@@ -1,4 +1,41 @@
-version: '3.8'
 services:
-  test:
-    image: hello-world
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: climate_data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "climate_data"]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+      timeout: 5s
+
+  meltano:
+    image: meltano/meltano:latest
+    container_name: meltano
+    environment:
+      - MELTANO_HOME=/meltano
+      - MELTANO_PROJECT_NAME=climate_data_project
+    working_dir: /meltano
+    volumes:
+      - meltano_data:/meltano
+    depends_on:
+      - postgres
+    entrypoint: /bin/bash -c "meltano init --force climate_data_project && tail -f /dev/null"  # Adicionando --force
+    healthcheck:
+      test: ["CMD", "meltano", "--version"]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+      timeout: 5s
+
+volumes:
+  postgres_data:
+  meltano_data:
