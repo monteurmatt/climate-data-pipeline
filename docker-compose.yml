@@ -25,10 +25,11 @@ services:
       - MELTANO_PROJECT_NAME=climate_data_project
     working_dir: /meltano
     volumes:
-      - meltano_data:/meltano
+      - ./data:/data  
+      - ./climate_data_project:/meltano
     depends_on:
       - postgres
-    entrypoint: /bin/bash -c "meltano init --force climate_data_project && tail -f /dev/null"  # Adicionando --force
+    entrypoint: /bin/bash -c "tail -f /dev/null"
     healthcheck:
       test: ["CMD", "meltano", "--version"]
       interval: 10s

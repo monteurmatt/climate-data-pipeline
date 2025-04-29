@@ -1,0 +1,31 @@
+version: 1
+default_environment: dev
+project_id: 331eb344-d729-4dd4-8707-c2dcb52bb9f9
+environments:
+- name: dev
+- name: staging
+- name: prod
+plugins:
+  extractors:
+  - name: tap-csv
+    variant: meltanolabs
+    pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
+    config:
+      files:
+      - entity: climate_data
+        path: /data/city_temperature.csv
+        keys:
+        - id
+        encoding: utf-8
+        # add_metadata_columns: true
+  loaders:
+  - name: target-postgres
+    variant: meltanolabs
+    pip_url: meltanolabs-target-postgres
+    config:
+      host: postgres
+      port: 5432
+      user: postgres
+      database: climate_data
+      schema: public
+    
